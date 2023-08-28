@@ -50,28 +50,19 @@ getCurrentDate();
 
 
 
-function sendRequest(method, url, body) {
-  const xhr = new XMLHttpRequest();
-  xhr.open(method, url);
-  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-  xhr.send(body);
+sendRequest('POST', 'https://jscp-diplom.netoserver.ru/', 'event=update', function (response) {
+  let main = document.querySelector('main');
+  let films = response.films.result;
+  let seance = response.seances.result;
+  let halls = response.halls.result.filter((hallOpen) => hallOpen.hall_open !== '0');
 
-  xhr.addEventListener('load', () => {
+  for (let film of films) {
+    let hallSeanse = '';
+    halls.forEach(function (hall) {
+      let sncs = seance.filter((seanses) => (seanses.seance_filmid == film.film_id) && (seanses.seance_hallid == hall.hall_id))
 
-    if (xhr.status >= 200 && xhr.status < 300) {
-      let main = document.querySelector('main');
-      let value = JSON.parse(xhr.response);
-      let films = value.films.result;
-      let seance = value.seances.result;
-      let halls = value.halls.result.filter((hallOpen) => hallOpen.hall_open !== '0');
-
-      for (let film of films) {
-        let hallSeanse = '';
-        halls.forEach(function (hall) {
-          let sncs = seance.filter((seanses) => (seanses.seance_filmid == film.film_id) && (seanses.seance_hallid == hall.hall_id))
-
-          if (sncs.length > 0) {
-            hallSeanse += `
+      if (sncs.length > 0) {
+        hallSeanse += `
           <div class="movie-seances__hall">
           <h3 class="movie-seances__hall-title">${hall.hall_name}</h3>
             <ul class="movie-seances__list">
@@ -86,11 +77,11 @@ function sendRequest(method, url, body) {
             `)}
             </ul>
           </div> `
-          }
-        });
+      }
+    });
 
-        if (hallSeanse) {
-          let createSection = `
+    if (hallSeanse) {
+      let createSection = `
           <section class="movie">
             <div class="movie__info">
               <div class="movie__poster">
@@ -109,19 +100,12 @@ function sendRequest(method, url, body) {
           </section>
         `
 
-          main.insertAdjacentHTML('afterBegin', createSection);
-        }
-      }
-
-      pastSeances();
-    } else {
-      alert('Ошибка загрузки. Повторите позднее.');
+      main.insertAdjacentHTML('afterBegin', createSection);
     }
-  })
+  }
 
-}
-
-sendRequest('POST', 'https://jscp-diplom.netoserver.ru/', 'event=update');
+  pastSeances();
+});
 
 
 
