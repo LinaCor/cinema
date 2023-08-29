@@ -1,53 +1,56 @@
 function getCurrentDate() {
   let navigation = document.querySelector('.page-nav');
   let date = new Date();
-  let currentDateIndex = date.getDay();
   let currentDay = date.getDate();
+  let newDate = new Date();
 
   let arrayDay = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
-
   for (let i = 0; i < arrayDay.length - 1; i++) {
-    if (arrayDay.indexOf(arrayDay[date.getDay()]) == currentDateIndex) {
-      let createNavFirst = `
-      <a class="page-nav__day page-nav__day_today page-nav__day_chosen" href="#">
-      <span class="page-nav__day-week">${arrayDay[date.getDay()]}</span><span class="page-nav__day-number">${currentDay}</span>
-      </a>
-      `
+    if (date.getDay() === i) {
+      let createNavFirst =
+        `<a class="page-nav__day page-nav__day_today page-nav__day_chosen" href="#">
+          <span class="page-nav__day-week">${arrayDay[date.getDay()]}</span><span class="page-nav__day-number">${currentDay}</span>
+        </a>`
       navigation.insertAdjacentHTML('afterBegin', createNavFirst);
     }
 
-    date.setSeconds(date.getSeconds() + 24 * 60 * 60);
-    let nextDay = date.getDate();
-    let createNav = `
-      <a class="page-nav__day" href="#">
-        <span class="page-nav__day-week">${arrayDay[date.getDay()]}</span><span class="page-nav__day-number">${nextDay}</span>
-      </a>
-      `
+    let nextDay = newDate.getDate(newDate.setSeconds(newDate.getSeconds() + 24 * 60 * 60));
+    let createNav =
+      `<a class="page-nav__day" href="#">
+        <span class="page-nav__day-week">${arrayDay[newDate.getDay()]}</span><span class="page-nav__day-number">${nextDay}</span>
+      </a>`
     navigation.insertAdjacentHTML('beforeEnd', createNav);
   }
 
   let allDay = document.querySelectorAll('.page-nav__day');
+  let timeStampCounter = 0;
   for (let day of allDay) {
+    const dataStamp = new Date();
+    let selectedIndex = arrayDay.indexOf(arrayDay[date.getDay() - 2]);
+    dataStamp.setDate(dataStamp.getDate() + selectedIndex);
+    dataStamp.setHours(0, 0, 0);
+    dataStamp.setDate(dataStamp.getDate() + timeStampCounter);
+    day.setAttribute('data-time-stamp', Math.floor(dataStamp.getTime() / 1000));
+    timeStampCounter++;
+
     let weekDay = day.querySelector('.page-nav__day-week');
     if (weekDay.textContent == 'сб' || weekDay.textContent == 'вс') {
       day.classList.add('page-nav__day_weekend');
     }
 
-
     day.addEventListener('click', (event) => {
-      let xxx = day.querySelector('.page-nav__day-number').textContent;
       event.preventDefault();
       for (let otherWeek of allDay) {
         otherWeek.classList.remove('page-nav__day_chosen');
       }
       day.classList.add('page-nav__day_chosen');
 
+      pastSeances();
     })
   }
 }
 
 getCurrentDate();
-
 
 
 sendRequest('POST', 'https://jscp-diplom.netoserver.ru/', 'event=update', function (response) {
@@ -111,18 +114,35 @@ sendRequest('POST', 'https://jscp-diplom.netoserver.ru/', 'event=update', functi
 
 function pastSeances() {
   let seances = document.querySelectorAll('.movie-seances__time');
-  for (let seance of seances) {
-    let timeStart = seance.getAttribute('data-seance-start');
-    let nowDate = new Date();
+  let selectedDay = document.querySelector('.page-nav__day_chosen');
+  let startDay = Number(selectedDay.getAttribute('data-time-stamp'));
 
-    let actualMinute = (nowDate.getHours() * 60) + nowDate.getMinutes();
-    if (Number(timeStart) <= actualMinute) {
+
+  for (let seance of seances) {
+    let timeStart = seance.getAttribute('data-seance-start'); //выгружаю минуты начала сеанса
+    let timeDayCurrent = startDay + timeStart * 60; //начало фильма в секундах зависимости от дня
+
+    seance.setAttribute('data-time-stamp-seance', timeDayCurrent);
+
+    let nowDate = new Date();
+    let actualSeconds = Math.floor(nowDate.getTime() / 1000);
+
+    let seanceBeggin = Number(seance.getAttribute('data-time-stamp-seance'));
+    console.log(actualSeconds, seanceBeggin)
+
+    if (actualSeconds >= seanceBeggin) {
       seance.setAttribute('href', 'javascript:void(0)');
       seance.style.background = '#bfbbbb';
       seance.style.cursor = 'default ';
+    } else {
+      seance.setAttribute('href', 'hall.html');
+      seance.style.background = '#fff';
+      seance.style.cursor = 'pointer';
     }
   }
 }
+
+
 
 
 
