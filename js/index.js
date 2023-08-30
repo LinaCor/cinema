@@ -26,11 +26,14 @@ function getCurrentDate() {
   let timeStampCounter = 0;
   for (let day of allDay) {
     const dataStamp = new Date();
-    let selectedIndex = arrayDay.indexOf(arrayDay[date.getDay() - 2]);
-    dataStamp.setDate(dataStamp.getDate() + selectedIndex);
+    //let selectedIndex = arrayDay.indexOf(arrayDay[date.getDay()]);
+    dataStamp.setDate(dataStamp.getDate());
+    //dataStamp.setDate(dataStamp.getDate() + selectedIndex);
     dataStamp.setHours(0, 0, 0);
     dataStamp.setDate(dataStamp.getDate() + timeStampCounter);
+    console.log(Math.floor(dataStamp.getTime() / 1000))
     day.setAttribute('data-time-stamp', Math.floor(dataStamp.getTime() / 1000));
+
     timeStampCounter++;
 
     let weekDay = day.querySelector('.page-nav__day-week');
@@ -126,9 +129,7 @@ function pastSeances() {
 
     let nowDate = new Date();
     let actualSeconds = Math.floor(nowDate.getTime() / 1000);
-
     let seanceBeggin = Number(seance.getAttribute('data-time-stamp-seance'));
-    console.log(actualSeconds, seanceBeggin)
 
     if (actualSeconds >= seanceBeggin) {
       seance.setAttribute('href', 'javascript:void(0)');
