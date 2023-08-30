@@ -23,3 +23,4 @@ function sendRequest(method, url, body, func) {
 
   xhr.send(body);
 }
+

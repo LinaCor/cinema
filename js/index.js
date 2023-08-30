@@ -31,7 +31,6 @@ function getCurrentDate() {
     //dataStamp.setDate(dataStamp.getDate() + selectedIndex);
     dataStamp.setHours(0, 0, 0);
     dataStamp.setDate(dataStamp.getDate() + timeStampCounter);
-    console.log(Math.floor(dataStamp.getTime() / 1000))
     day.setAttribute('data-time-stamp', Math.floor(dataStamp.getTime() / 1000));
 
     timeStampCounter++;
@@ -74,7 +73,7 @@ sendRequest('POST', 'https://jscp-diplom.netoserver.ru/', 'event=update', functi
             <ul class="movie-seances__list">
             ${sncs.map(seanc => `
             <li class="movie-seances__time-block">
-              <a class="movie-seances__time" href="hall.html" data-film-name ="${film.film_name}"
+              <a class="movie-seances__time" data-film-name ="${film.film_name}"
               data-seance-start="${seanc.seance_start}" data-seance-time="${seanc.seance_time}"
               data-hall-name="${hall.hall_name}" data-hall-id="${hall.hall_id}" data-seance-id="${seanc.seance_id}"
               data-hall-price-standart="${hall.hall_price_standart}"
@@ -110,20 +109,19 @@ sendRequest('POST', 'https://jscp-diplom.netoserver.ru/', 'event=update', functi
     }
   }
 
-  pastSeances();
+  pastSeances(halls);
 });
 
 
-
-function pastSeances() {
+function pastSeances(x) {
   let seances = document.querySelectorAll('.movie-seances__time');
   let selectedDay = document.querySelector('.page-nav__day_chosen');
   let startDay = Number(selectedDay.getAttribute('data-time-stamp'));
-
+  let arrayHall = x;
 
   for (let seance of seances) {
-    let timeStart = seance.getAttribute('data-seance-start'); //выгружаю минуты начала сеанса
-    let timeDayCurrent = startDay + timeStart * 60; //начало фильма в секундах зависимости от дня
+    let timeStart = seance.getAttribute('data-seance-start');
+    let timeDayCurrent = startDay + timeStart * 60;
 
     seance.setAttribute('data-time-stamp-seance', timeDayCurrent);
 
@@ -136,13 +134,23 @@ function pastSeances() {
       seance.style.background = '#bfbbbb';
       seance.style.cursor = 'default ';
     } else {
-      seance.setAttribute('href', 'hall.html');
       seance.style.background = '#fff';
       seance.style.cursor = 'pointer';
+      seance.setAttribute('href', 'hall.html');
     }
+
+    seance.addEventListener('click', (event) => {
+      let choseData = event.target.dataset;
+      let selectHall = arrayHall.find((hall) => hall.hall_id == choseData.hallId)
+      let selectedSeanceInfo = {
+        ...choseData,
+        hallConfig: selectHall.hall_config
+      }
+
+      localStorage.setItem('seance', JSON.stringify(selectedSeanceInfo));
+    })
   }
 }
-
 
 
 
