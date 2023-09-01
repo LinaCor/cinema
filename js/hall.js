@@ -30,9 +30,14 @@ sendRequest('POST', 'https://jscp-diplom.netoserver.ru/', `event=get_hallConfig&
 
   for (let chair of chairs) {
     chair.style.cursor = 'pointer';
+    if (chair.classList.contains('conf-step__chair_taken') || chair.classList.contains('conf-step__chair_disabled')) {
+      chair.style.cursor = 'default';
+    }
 
     chair.addEventListener('click', () => {
-      chair.classList.toggle('conf-step__chair_selected');
+      if (!(chair.classList.contains('conf-step__chair_taken')) && !(chair.classList.contains('conf-step__chair_disabled'))) {
+        chair.classList.toggle('conf-step__chair_selected');
+      }
 
       chairsSelected = document.querySelectorAll('.conf-step__row .conf-step__chair_selected');
       if (chairsSelected.length == 0) {
