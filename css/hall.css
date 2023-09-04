@@ -1,5 +1,5 @@
 @media (max-width: 990px) {
   body {
-    touch-action: auto;
+    touch-action: manipulation;
   }
 }
