@@ -1,3 +1,5 @@
+let halls = [];
+
 function getCurrentDate() {
   let navigation = document.querySelector('.page-nav');
   let date = new Date();
@@ -59,7 +61,7 @@ sendRequest('POST', 'https://jscp-diplom.netoserver.ru/', 'event=update', functi
   let main = document.querySelector('main');
   let films = response.films.result;
   let seance = response.seances.result;
-  let halls = response.halls.result.filter((hallOpen) => hallOpen.hall_open !== '0');
+  halls = response.halls.result.filter((hallOpen) => hallOpen.hall_open !== '0');
 
   for (let film of films) {
     let hallSeanse = '';
@@ -109,15 +111,14 @@ sendRequest('POST', 'https://jscp-diplom.netoserver.ru/', 'event=update', functi
     }
   }
 
-  pastSeances(halls);
+  pastSeances();
 });
 
 
-function pastSeances(x) {
+function pastSeances() {
   let seances = document.querySelectorAll('.movie-seances__time');
   let selectedDay = document.querySelector('.page-nav__day_chosen');
   let startDay = Number(selectedDay.getAttribute('data-time-stamp'));
-  let arrayHall = x;
 
   for (let seance of seances) {
     let timeStart = seance.getAttribute('data-seance-start');
@@ -141,7 +142,7 @@ function pastSeances(x) {
 
     seance.addEventListener('click', (event) => {
       let choseData = event.target.dataset;
-      let selectHall = arrayHall.find((hall) => hall.hall_id == choseData.hallId)
+      let selectHall = halls.find((hall) => hall.hall_id == choseData.hallId)
       let selectedSeanceInfo = {
         ...choseData,
         hallConfig: selectHall.hall_config
